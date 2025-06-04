@@ -1,0 +1,6 @@
+kubectl port-forward svc/photo-srv 4002:4002
+kubectl port-forward svc/daily-journey-srv 4003:4003
+kubectl port-forward svc/album-srv 4007:4007
+kubectl port-forward svc/auth-srv 3000:3000
+kubectl port-forward svc/event-srv 4000:4000
+kubectl port-forward svc/timeline-srv 4009:4009

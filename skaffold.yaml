@@ -1,0 +1,90 @@
+apiVersion: skaffold/v2alpha3
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - ./infra/k8s/*
+build:
+  local:
+    push: false
+  # googleCloudBuild:
+  #   projectId: my-love-455022
+  artifacts:
+    # - image: us.gcr.io/my-love-455022/album-service
+    - image: 076161/album-service
+      context: album-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+          - src: "src/*.ts"
+            dest: .
+          - src: "src/**/**/*.ts"
+            dest: .
+          - src: "src/**/**/**/*.ts"
+            dest: .
+    # - image: us.gcr.io/my-love-455022/love-auth
+    - image: 076161/love-auth
+      context: auth-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+          - src: "src/*.ts"
+            dest: .
+          - src: "src/**/**/*.ts"
+            dest: .
+          - src: "src/**/**/**/*.ts"
+            dest: .
+    # - image: us.gcr.io/my-love-455022/love-photo
+    - image: 076161/love-photo
+      context: photo-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    # - image: us.gcr.io/my-love-455022/love-event
+    - image: 076161/love-event
+      context: event-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    # - image: us.gcr.io/my-love-455022/love-daily-journey
+    - image: 076161/love-daily-journey
+      context: daily-journey-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+          - src: "src/*.ts"
+            dest: .
+          - src: "src/**/**/*.ts"
+            dest: .
+          - src: "src/**/**/**/*.ts"
+            dest: .
+    # - image: us.gcr.io/my-love-455022/timeline-service
+    - image: 076161/timeline-service
+      context: timeline-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+          - src: "src/*.ts"
+            dest: .
+          - src: "src/**/**/*.ts"
+            dest: .
+          - src: "src/**/**/**/*.ts"
+            dest: .

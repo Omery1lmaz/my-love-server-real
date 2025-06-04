@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          # image: us.gcr.io/my-love-455022/love-auth
+          image: 076161/love-auth
+          env:
+            - name: MONGO_URI
+              value: "mongodb://admin:password123@auth-mongo-srv:27017/auth?authSource=admin"
+            - name: NATS_CLIENT_ID
+              value: "abc"
+            - name: NATS_URL
+              value: "http://nats-srv:4222"
+            - name: NATS_CLUSTER_ID
+              value: "ticketing"
+            - name: JWT_KEY
+              value: "asdf"
+            - name: RESET_PASSWORD_SECRET_KEY
+              value: "reset_password_secret"
+            - name: SECRET_KEY
+              value: "secret_key"
+            - name: GOOGLE_CLIENT_ID
+              value: "your_google_client_id"
+            - name: GOOGLE_CLIENT_SECRET
+              value: "your_google_client_secret"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-srv
+spec:
+  selector:
+    app: auth
+  ports:
+    - name: auth
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

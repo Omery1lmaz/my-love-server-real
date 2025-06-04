@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: album-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: album
+  template:
+    metadata:
+      labels:
+        app: album
+    spec:
+      containers:
+        - name: album
+          # image: us.gcr.io/my-love-455022/album-service
+          image: 076161/album-service
+          env:
+            - name: EMAIL_USER
+              value: omery020040@gmail.com
+            - name: EMAIL_PASS
+              value: wgbehbiaqxlthblt
+            - name: NATS_CLUSTER_ID
+              value: ticketing
+            - name: SECRET_KEY
+              value: SECRET_KEY
+            - name: RESET_PASSWORD_SECRET_KEY
+              value: SECRET_KEY
+            - name: MONGO_URI
+              value: "mongodb://album-mongo-srv:27017/album"
+            - name: NATS_CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NATS_URL
+              value: "http://nats-srv:4222"
+          ports:
+            - containerPort: 4007
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: album-srv
+spec:
+  selector:
+    app: album
+  ports:
+    - name: album
+      protocol: TCP
+      port: 4007
+      targetPort: 4007
