@@ -49,7 +49,7 @@ interface Movie {
   vote_average: number;
   vote_count: number;
 }
-interface BookAttrs {
+export interface BookAttrs {
   name: string;
   author: string | undefined;
   image: string | undefined;

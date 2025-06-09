@@ -52,6 +52,9 @@ import { getHobbiesRouter } from "./routes/getHobbies";
 import { updateHobbyRouter } from "./routes/updateHobby";
 import { getHobbyDetailsRouter } from "./routes/getHobbyDetails";
 import { deleteHobbyRouter } from "./routes/deleteHobby";
+import { createBookRouter } from "./routes/createBook";
+import { deleteBookRouter } from "./routes/deleteBook";
+import { getBooksRouter } from "./routes/getBooks";
 
 const app = express();
 app.set("trust proxy", true);
@@ -124,6 +127,9 @@ app.use(getTodayMoodRouter);
 app.use(reminderRouter);
 
 // User's Favorite Books
+app.use(createBookRouter);
+app.use(deleteBookRouter);
+app.use(getBooksRouter);
 app.use(updateUserFavoriteBookRouter);
 
 // User's Favorite Movies
