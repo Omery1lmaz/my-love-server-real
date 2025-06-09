@@ -3,7 +3,7 @@ import { NotAuthorizedError } from "@heaven-nsoft/common";
 import jwt from "jsonwebtoken";
 import { Timeline } from "../models/timeline";
 
-export const createTimelineController = async (
+export const getTimeLineByUser = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -48,4 +48,4 @@ export const createTimelineController = async (
   }
 };
 
-export default createTimelineController;
+export default getTimeLineByUser;

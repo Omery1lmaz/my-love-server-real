@@ -21,15 +21,17 @@ export const createTimelineController = async (
     const decoded = jwt.verify(token, process.env.SECRET_KEY!) as {
       id: string;
     };
+    console.log(decoded.id, "decoded")
+    const users = await User.find()
     const user = await User.findById(decoded.id);
-
+    console.log("users", users)
     if (!user) {
-      console.log("partner not found");
+      console.log("user not found");
       res.status(404).json({ message: "User not found" });
       return;
     }
-
-    if (user.partnerId) {
+    console.log(user.partnerId, "user partner Id")
+    if (!user.partnerId) {
       console.log("no parnter");
       res.status(400).json({ message: "User has no partner" });
       return;
@@ -41,17 +43,19 @@ export const createTimelineController = async (
       date,
       type,
       isPrivate,
+      icon
     }: {
       title: string;
       description: string;
       date: string;
       type:
-        | "anniversary"
-        | "first_meet"
-        | "first_date"
-        | "special_moment"
-        | "custom";
+      | "anniversary"
+      | "first_meet"
+      | "first_date"
+      | "special_moment"
+      | "custom";
       isPrivate: boolean;
+      icon: string;
     } = req.body;
 
     const timelineEvent = Timeline.build({
@@ -64,6 +68,7 @@ export const createTimelineController = async (
       photos: [],
       coverPhotoId: undefined,
       isPrivate,
+      icon
     });
 
     await timelineEvent.save();

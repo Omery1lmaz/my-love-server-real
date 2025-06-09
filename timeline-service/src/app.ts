@@ -2,6 +2,7 @@ import { json } from "body-parser";
 import express, { NextFunction } from "express";
 import { errorHandler, NotFoundError } from "@heaven-nsoft/common";
 import { createTimelineRouter } from "./routes/createTimeline";
+import { getTimelineByUserRouter } from "./routes/getTimelineByUser";
 
 // **Configuration
 const app = express();
@@ -15,6 +16,7 @@ app.all("*", async (req, res, next) => {
 // ** Routes
 
 app.use(createTimelineRouter);
+app.use(getTimelineByUserRouter);
 // **Catch-all error handler**
 app.all("*", async (req, res, next: NextFunction) => {
   next(new NotFoundError());

@@ -3,6 +3,10 @@ import { natsWrapper } from "./nats-wrapper";
 import { app } from "./app";
 import { EventCreatedEvent } from "./events/listeners/event-created-listener";
 import { TimelinePhotoCreatedEvent } from "./events/listeners/timeline-photo-created-listener";
+import { UserCreatedEvent } from "./events/listeners/user-created-listener";
+import { UserAccountDeletedEvent } from "./events/listeners/user-account-deleted";
+import { UserPartnerUpdatedEvent } from "./events/listeners/user-partner-updated-listener";
+import { UserActivatedEvent } from "./events/listeners/user-activated-event";
 const uri =
   "mongodb+srv://omery020040:test123.@cluster0.sje674p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -39,6 +43,10 @@ const start = async () => {
       console.log("test deneme");
       new EventCreatedEvent(natsWrapper.client).listen();
       new TimelinePhotoCreatedEvent(natsWrapper.client).listen();
+      new UserCreatedEvent(natsWrapper.client).listen()
+      new UserAccountDeletedEvent(natsWrapper.client).listen()
+      new UserPartnerUpdatedEvent(natsWrapper.client).listen()
+      new UserActivatedEvent(natsWrapper.client).listen()
       process.on("SIGINT", () => natsWrapper.client.close());
       process.on("SIGTERM", () => natsWrapper.client.close());
     } catch (err) {

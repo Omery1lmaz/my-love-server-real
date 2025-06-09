@@ -15,6 +15,7 @@ interface TimelineAttrs {
   photos?: mongoose.Types.ObjectId[];
   coverPhotoId?: mongoose.Types.ObjectId;
   isPrivate?: boolean;
+  icon?: string;
 }
 
 interface TimelineDoc extends Document, TimelineAttrs {
@@ -47,6 +48,7 @@ const TimelineSchema = new Schema<TimelineDoc>(
     photos: [{ type: Schema.Types.ObjectId, ref: "Photo" }],
     coverPhotoId: { type: Schema.Types.ObjectId, ref: "Photo" },
     isPrivate: { type: Boolean, default: false },
+    icon: { type: String, default: "heart" },
   },
   { timestamps: true }
 );
