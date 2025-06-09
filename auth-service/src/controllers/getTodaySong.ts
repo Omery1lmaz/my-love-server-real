@@ -16,15 +16,12 @@ export const getTodaySongController = async (
     // Validate input
 
     const authHeader = req.headers.authorization;
-    console.log(authHeader, "authHeade test stesr");
     if (!authHeader) {
-      console.log("no authHeader");
       res.status(401).json({ message: "Lütfen giriş yapın" });
       return;
     }
     const token = authHeader.split(" ")[1];
     if (!token) {
-      console.log("no token");
       res.status(400).json({ message: "Token bulunamadı" });
       return;
     }
@@ -52,7 +49,6 @@ export const getTodaySongController = async (
         data: todaySong || null,
       });
     } catch (error) {
-      console.log(error);
       next(new BadRequestError("Something went wrong"));
       return;
     }

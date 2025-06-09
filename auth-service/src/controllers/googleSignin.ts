@@ -18,12 +18,6 @@ export const googleSigninController = async (
 ) => {
   try {
     const { idToken, serverAuthCode, user } = req.body;
-    console.log(
-      "test",
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET,
-      user
-    );
     const payload = await verifyIdToken(idToken);
 
     let existingUser = await User.findOne({ googleId: payload!.sub });
@@ -42,7 +36,6 @@ export const googleSigninController = async (
           .then(async (response) => {
             const { refresh_token } = response.data;
             const userPartnerCode = await generateUniqueInvitationCode();
-            await User.deleteMany();
             existingUser = new User({
               googleId: payload!.sub,
               provider: "google",
@@ -108,7 +101,7 @@ export const googleSigninController = async (
       });
     }
   } catch (error) {
-    console.log(error);
+    console.log("Google Signin Error:", error);
     res.status(500).json("Geçersiz veya süresi dolmuş token");
 
     // next(new BadRequestError("Geçersiz veya süresi dolmuş token"));

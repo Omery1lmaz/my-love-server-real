@@ -10,7 +10,6 @@ export const signinController = async (
 ) => {
   try {
     const { email, password } = req.body;
-
     // Kullanıcıyı email ile bul
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
@@ -19,28 +18,25 @@ export const signinController = async (
     }
 
     if (user.provider !== "email") {
-      console.log("test 1");
       next(new BadRequestError("Bu kullanıcı farklı bir sağlayıcıya bağlı"));
       return;
     }
 
     if (user.isDeleted) {
-      console.log("test 2");
       next(new BadRequestError("Bu hesap silinmiştir"));
       return;
     }
 
     // Kullanıcı aktif mi?
     if (!user.isActive) {
-      console.log("test 3");
       next(new BadRequestError("Lütfen emailinizi onaylayınız"));
       return;
     }
 
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
-      console.log("test 4");
       next(new BadRequestError("Hesap bilgileri uyuşmuyor"));
+      return;
     }
 
     const token = createToken(
@@ -53,7 +49,6 @@ export const signinController = async (
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
-    console.log(token, "token");
     res.status(200).json({
       _id: user._id,
       email: user.email,
@@ -61,7 +56,6 @@ export const signinController = async (
       token: token,
     });
   } catch (error) {
-    console.log(error, "error something went wrong");
     next(new BadRequestError("Hesap bilgileri uyuşmuyor"));
   }
 };

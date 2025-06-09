@@ -11,7 +11,6 @@ const updateSharedSpotifyAlbumController = async (
 ) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    console.log("no authHeader");
     res.status(401).json({ message: "Lütfen giriş yapın" });
     return;
   }
@@ -44,30 +43,14 @@ const updateSharedSpotifyAlbumController = async (
   } = req.body;
   const token = authHeader.split(" ")[1];
   if (!token) {
-    console.log("no token");
     res.status(400).json({ message: "Token bulunamadı" });
     return;
   }
   try {
-    console.log(
-      "test body",
-      albumId,
-      albumLink,
-      name,
-      artists,
-      images,
-      releaseDate,
-      totalTracks,
-      label,
-      genres,
-      externalUrls,
-      uri,
-      type
-    );
+   
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY!) as {
       id: string;
     };
-    console.log(decodedToken, "decoded token");
     const user = await User.findById(
       new mongoose.Types.ObjectId(decodedToken.id)
     );
@@ -124,7 +107,6 @@ const updateSharedSpotifyAlbumController = async (
       },
     });
   } catch (error) {
-    console.log(error, "error");
     res.status(400).json({ message: "Kimlik doğrulama başarısız" });
   }
 };

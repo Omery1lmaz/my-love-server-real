@@ -51,7 +51,8 @@ export const createTodaySongController = async (
         const songChoosen = song.chosenBy?.toString() === user._id.toString();
         return songDate === today && songChoosen;
       });
-
+git config --global user.email "omery020040@gmail.com"
+  git config --global user.name "Heaven"
       if (hasSongForToday) {
         next(new BadRequestError("You already have a song for today."));
         return;

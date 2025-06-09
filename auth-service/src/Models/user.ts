@@ -105,6 +105,7 @@ interface UserAttrs {
     hobbies?: string[];
   };
   dailySong?: DailySong[];
+  sendedMusic?: DailySong[];
   // This is a list of favorite songs for the user
   // This is not gonna be used for now
   favorites?: {
@@ -116,14 +117,14 @@ interface UserAttrs {
   moodHistory?: {
     date: Date;
     mood:
-      | "happy"
-      | "sad"
-      | "angry"
-      | "stressed"
-      | "excited"
-      | "tired"
-      | "peaceful"
-      | "anxious";
+    | "happy"
+    | "sad"
+    | "angry"
+    | "stressed"
+    | "excited"
+    | "tired"
+    | "peaceful"
+    | "anxious";
     note?: string;
     activities?: string[];
   }[];
@@ -158,7 +159,7 @@ interface UserAttrs {
     albumLink?: string;
     name?: string;
     artists?: string[];
-    images?: { url: string; height: number; width: number }[];
+    images?: { url: string | null; height: number; width: number | null }[];
     releaseDate?: string;
     totalTracks?: number;
     label?: string;
@@ -242,7 +243,7 @@ interface UserDoc extends mongoose.Document {
     albumLink?: string;
     name?: string;
     artists?: string[];
-    images?: { url: string; height: number; width: number }[];
+    images?: { url: string | null; height: number; width: number | null }[];
     releaseDate?: string;
     totalTracks?: number;
     label?: string;
@@ -264,18 +265,19 @@ interface UserDoc extends mongoose.Document {
   moodHistory?: {
     date: Date;
     mood:
-      | "happy"
-      | "sad"
-      | "angry"
-      | "stressed"
-      | "excited"
-      | "tired"
-      | "peaceful"
-      | "anxious";
+    | "happy"
+    | "sad"
+    | "angry"
+    | "stressed"
+    | "excited"
+    | "tired"
+    | "peaceful"
+    | "anxious";
     note?: string;
     activities?: string[];
   }[];
   dailySong?: DailySong[];
+  sendedMusic?: DailySong[];
   relationshipTimeline?: {
     date: Date;
     event: string;
@@ -333,8 +335,8 @@ const userSchema = new mongoose.Schema<UserDoc>(
         images: [
           {
             url: { type: String, required: false },
-            height: { type: Number },
-            width: { type: Number },
+            height: { type: Number, required: false },
+            width: { type: Number, required: false },
           },
         ],
         releaseDate: { type: String, required: false },
@@ -356,6 +358,31 @@ const userSchema = new mongoose.Schema<UserDoc>(
     partnerSpotifyRefreshToken: { type: String, required: false },
     partnerSpotifyAccessTokenExpires: { type: Date, required: false },
     dailySong: [
+      {
+        images: [
+          {
+            url: { type: String, required: false },
+            height: { type: Number, required: false },
+            width: { type: Number, required: false },
+          },
+        ],
+        external_urls: [
+          {
+            spotify: { type: String, required: false },
+          },
+        ],
+        spotifyArtist: { type: String, required: false },
+        spotifyAlbum: { type: String, required: false },
+        name: { type: String, required: false },
+        addedAt: { type: Date, required: true, default: Date.now },
+
+        date: { type: Date, required: true, default: Date.now },
+        spotifyTrackId: { type: String, required: true },
+        chosenBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        message: { type: String },
+      },
+    ],
+    sendedMusic: [
       {
         images: [
           {

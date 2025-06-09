@@ -13,13 +13,11 @@ const refreshPartnerSpotifyTokenController = async (
 ) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    console.log("no authHeader");
     res.status(401).json({ message: "Lütfen giriş yapın" });
     return;
   }
   const token = authHeader.split(" ")[1];
   if (!token) {
-    console.log("no token");
     res.status(400).json({ message: "Token bulunamadı" });
     return;
   }
@@ -27,7 +25,6 @@ const refreshPartnerSpotifyTokenController = async (
     const decodedToken = jwt.verify(token, process.env.SECRET_KEY!) as {
       id: string;
     };
-    console.log(decodedToken, "decoded token");
     const user = await User.findById(
       new mongoose.Types.ObjectId(decodedToken.id)
     );
@@ -36,7 +33,6 @@ const refreshPartnerSpotifyTokenController = async (
       return;
     }
     if (!user.partnerSpotifyRefreshToken) {
-      console.log("there is no user partner's spotify refresh token");
       next(
         new BadRequestError("there is no user partner's spotify refresh token")
       );
@@ -53,9 +49,7 @@ const refreshPartnerSpotifyTokenController = async (
       body: `grant_type=refresh_token&refresh_token=${user.partnerSpotifyRefreshToken}`,
     });
     const data = await response.json();
-    console.log(data.access_token, "data");
     if (data.error) {
-      console.log(data, "data error test Spotify token yenileme hatası ");
       res.status(400).json({ message: "Spotify token yenileme hatası" });
       return;
     }
@@ -74,7 +68,6 @@ const refreshPartnerSpotifyTokenController = async (
       },
     });
   } catch (error) {
-    console.log(error, "error");
     res.status(400).json({ message: "Kimlik doğrulama başarısız" });
   }
 };

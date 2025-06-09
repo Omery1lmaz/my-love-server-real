@@ -42,6 +42,9 @@ import { updateSharedSpotifyAlbumRouter } from "./routes/updateSharedSpotifyAlbu
 import { getSharedSpotifyAlbumRouter } from "./routes/getSharedSpotifyAlbum";
 import { createTodaySongRouter } from "./routes/createTodaySong";
 import { getTodaySongRouter } from "./routes/getTodaySong";
+import { updateSharedPlaylistCoverImageRouter } from "./routes/updateSharedPlaylistCoverImage";
+import { updateSharedSpotifyAlbumDetailRouter } from "./routes/updateSharedSpotifyAlbumDetail";
+import { getSharedSpotifyAlbumDetailRouter } from "./routes/getSharedSpotifyAlbumDetail";
 
 const app = express();
 app.set("trust proxy", true);
@@ -59,11 +62,14 @@ app.all("", async (req, res, next) => {
 // Spotify
 
 app.use(getSharedSpotifyAlbumRouter);
+app.use(getSharedSpotifyAlbumDetailRouter);
 app.use(updateSharedSpotifyAlbumRouter);
 app.use(refreshPartnerSpotifyTokenRouter);
+app.use(updateSharedPlaylistCoverImageRouter);
 app.use(updateSpotifyTokensRouter);
 app.use(refreshSpotifyTokenRouter);
 app.use(createTodaySongRouter);
+app.use(updateSharedSpotifyAlbumDetailRouter);
 app.use(getTodaySongRouter);
 
 // Login or Signup
