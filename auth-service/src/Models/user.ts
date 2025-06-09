@@ -22,6 +22,14 @@ interface DailySong {
   message?: string; // Optional message for the song
   addedAt: Date; // Date when the song was added
 }
+export interface Hobby {
+  name: string;
+  icon: string;
+  description: string;
+  frequency: 'Daily' | 'Weekly' | 'Monthly' | 'Occasionally';
+  sharedWithPartner: boolean;
+}
+
 // Add any additional interfaces or functionality related to the User model here
 // For example, you could add interfaces for user preferences, notifications, settings, etc.
 // You can also add custom methods or plugins to enhance the User model functionality
@@ -41,6 +49,21 @@ interface Movie {
   vote_average: number;
   vote_count: number;
 }
+interface BookAttrs {
+  name: string;
+  author: string | undefined;
+  image: string | undefined;
+  description: string | undefined;
+  link: string;
+  year: string | undefined;
+  pageCount: number | undefined;
+  category: string | undefined;
+  language: string;
+  previewLink: string;
+  infoLink: string;
+  sharedWithPartner?: boolean;
+}
+
 interface Book {
   name: string;
   author: string | undefined;
@@ -96,7 +119,7 @@ interface UserAttrs {
   profilePhoto?: string;
   partnerNickname?: string;
   partnerNotes?: string;
-  hobbies?: string[];
+  hobbies?: Hobby[];
   // This is a list of interests for the user
   interests?: {
     music?: string[];
@@ -196,7 +219,7 @@ interface UserDoc extends mongoose.Document {
   profilePic?: string;
   firstMeetingStory?: string;
   firstMeetingDate?: Date;
-  hobbies?: string[];
+  hobbies?: Hobby[];
   relationshipGoals?: string[];
   provider: "email" | "google";
   googleId?: string;
@@ -209,6 +232,7 @@ interface UserDoc extends mongoose.Document {
   lastLogin?: Date;
   activityLog?: string[];
   resetPasswordOtp?: string;
+  books?: BookAttrs[];
   favoriteBook?: Book;
   resetPasswordToken?: string;
   otp?: string;
@@ -426,7 +450,39 @@ const userSchema = new mongoose.Schema<UserDoc>(
       ref: "User",
       default: null,
     },
-    hobbies: { type: [String], default: [] },
+    hobbies: [{
+      name: { type: String, required: true },
+      icon: {
+        type: String,
+        required: true,
+        // No enum, allowing any MaterialCommunityIcons icon name
+      },
+      description: { type: String, required: true },
+      frequency: {
+        type: String,
+        required: true,
+        enum: ['Daily', 'Weekly', 'Monthly', 'Occasionally']
+      },
+      sharedWithPartner: { type: Boolean, default: true },
+      isCustom: { type: Boolean, default: false }
+    }],
+    books: [{
+      link: { type: String, required: true },
+      name: { type: String, required: true },
+      image: { type: String, required: false },
+      previewLink: { type: String, required: false },
+      infoLink: { type: String, required: false },
+      sharedWithPartner: { type: Boolean, required: true, default: false },
+      category: { type: String, required: false },
+      description: { type: String, required: false },
+      pageCount: { type: Number, required: false },
+      language: { type: String, required: false },
+      year: { type: String, required: false },
+      author: {
+        type: String,
+        required: false,
+      },
+    }],
     relationshipStartDate: { type: Date, default: null },
     status: {
       type: String,

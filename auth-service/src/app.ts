@@ -45,6 +45,13 @@ import { getTodaySongRouter } from "./routes/getTodaySong";
 import { updateSharedPlaylistCoverImageRouter } from "./routes/updateSharedPlaylistCoverImage";
 import { updateSharedSpotifyAlbumDetailRouter } from "./routes/updateSharedSpotifyAlbumDetail";
 import { getSharedSpotifyAlbumDetailRouter } from "./routes/getSharedSpotifyAlbumDetail";
+import { sendSongRouter } from "./routes/sendSong";
+import { getSendSongRouter } from "./routes/getSendSong";
+import { createHobbyRouter } from "./routes/createHobby";
+import { getHobbiesRouter } from "./routes/getHobbies";
+import { updateHobbyRouter } from "./routes/updateHobby";
+import { getHobbyDetailsRouter } from "./routes/getHobbyDetails";
+import { deleteHobbyRouter } from "./routes/deleteHobby";
 
 const app = express();
 app.set("trust proxy", true);
@@ -71,6 +78,8 @@ app.use(refreshSpotifyTokenRouter);
 app.use(createTodaySongRouter);
 app.use(updateSharedSpotifyAlbumDetailRouter);
 app.use(getTodaySongRouter);
+app.use(sendSongRouter);
+app.use(getSendSongRouter);
 
 // Login or Signup
 
@@ -121,6 +130,11 @@ app.use(updateUserFavoriteBookRouter);
 app.use(updateUserFavoriteMovieRouter);
 
 // User's Hobbies
+app.use(createHobbyRouter);
+app.use(updateHobbyRouter);
+app.use(getHobbyDetailsRouter);
+app.use(deleteHobbyRouter);
+app.use(getHobbiesRouter);
 app.use(updateUserHobbiesRouter);
 app.use(getUserHobbiesRouter);
 

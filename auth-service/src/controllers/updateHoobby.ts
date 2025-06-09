@@ -6,26 +6,18 @@ import {
   NotAuthorizedError,
 } from "@heaven-nsoft/common";
 import jwt from "jsonwebtoken";
-export const sendSongController = async (
+export const updateHobbyController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const {
-      images,
-      name,
-      artists,
-      external_urls,
-      spotifyTrackId,
-      spotifyArtist,
-      spotifyAlbum,
-      // song: song,
-      message,
-    } = req.body;
-
+    const { hobby } = req.body;
+    const { id } = req.params;
+    console.log("hobby", hobby);
     const authHeader = req.headers.authorization;
     if (!authHeader) {
+      console.log("no authHeader");
       res.status(401).json({ message: "Lütfen giriş yapın" });
       return;
     }
@@ -40,42 +32,29 @@ export const sendSongController = async (
       };
       const user = await User.findById(decodedToken.id);
       if (!user) {
+      console.log("no user");
         next(new NotAuthorizedError());
         return;
       }
-      
-
-      
-      // Add today's song
-      const newSong = {
-        addedAt: new Date(),
-        date: new Date(Date.now()),
-        external_urls: external_urls,
-        id: spotifyTrackId,
-        images: images,
-        name: name,
-        spotifyAlbum: spotifyAlbum,
-        spotifyArtist: spotifyArtist,
-        spotifyTrackId: spotifyTrackId,
-        chosenBy: user._id,
-        message: message || "",
-      };
-
-      user.sendedMusic = user.sendedMusic || [];
-      user.sendedMusic.push(newSong);
-      if (user.partnerId) {
-        const partner = await User.findById(user.partnerId);
-        if (partner) {
-          partner.sendedMusic = partner.sendedMusic || [];
-          partner.sendedMusic.push(newSong);
-          await partner.save();
-        }
+      if(!user.hobbies || user.hobbies.length === 0) {
+        console.log("no hobbies");
+        next(new BadRequestError("Hobbies not found."));
+        return;
       }
+      const hobbyIndex = user.hobbies.findIndex(
+        (item) => (item as any)._id.toString() === id
+      );
+      if (hobbyIndex === -1) {
+        next(new BadRequestError("Hobby not found."));
+        return;
+      }
+      user.hobbies[hobbyIndex] = hobby;
       await user.save();
       res
         .status(200)
-        .send({ message: "Today's song has been set.", song: newSong });
+        .send({ message: "Today's song has been set.", songs: user.hobbies });
     } catch (error) {
+        console.log("errror", error);
       next(new NotAuthorizedError());
       return;
     }
