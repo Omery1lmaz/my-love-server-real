@@ -56,6 +56,7 @@ export class AlbumPhotoCreatedEvent extends Listener<AlbumPhotoCreatedEventHeave
               musicDetails: photo.musicDetails || null,
               location: photo.location || null,
               filterName: photo.filterName || "",
+              thumbnailUrl: photo.thumbnailUrl,
               likes: 0,
               comments: 0,
               fileType: photo.fileType || "image/jpeg",

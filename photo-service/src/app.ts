@@ -6,8 +6,10 @@ import { uploadMultiPhotoRouter } from "./routes/uploadMultiPhoto";
 import { getUserPhotosRouter } from "./routes/getUserPhotos";
 import { getPhotoByIdRouter } from "./routes/getPhotoById";
 import { uploadMultiPhotoEventRouter } from "./routes/uploadMultiPhotoEvent";
-import updateUserPhotoMoment from "./controllers/updateUserPhotoMoment";
 import { updateUserPhotoMomentRouter } from "./routes/updateUserPhotoMoment";
+import { uploadUserProfilePhotoRouter } from "./routes/uploadUserProfilePhoto";
+import { uploadMultiPhotoTimeLineRouter } from "./routes/uploadMultiPhotoTimeLine";
+import { uploadMultiPhotoDailyJourneyRouter } from "./routes/uploadMultiPhotoDailyJourney";
 
 // **Configuration
 const app = express();
@@ -22,12 +24,17 @@ app.all("*", async (req, res, next) => {
 app.use(uploadPhotoRouter);
 app.use(uploadMultiPhotoEventRouter);
 app.use(uploadMultiPhotoRouter);
+app.use(uploadMultiPhotoTimeLineRouter);
 app.use(getUserPhotosRouter);
 app.use(getPhotoByIdRouter);
 app.use(updateUserPhotoMomentRouter);
+app.use(uploadUserProfilePhotoRouter);
+app.use(uploadMultiPhotoDailyJourneyRouter);
+
 
 // **Catch-all error handler**
 app.all("*", async (req, res, next: NextFunction) => {
+  console.log("catch error")
   next(new NotFoundError());
 });
 app.use(

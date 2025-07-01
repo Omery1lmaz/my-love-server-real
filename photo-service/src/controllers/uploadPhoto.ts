@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import { NextFunction, Request, Response } from "express";
 import { BadRequestError, NotAuthorizedError } from "@heaven-nsoft/common";
 import { Photo } from "../models/photo";
+import sharp from "sharp";
+import { uploadToS3 } from "../utils/multer-s3/upload";
 
 export const uploadPhotoController = async (
   req: Request,
@@ -9,92 +11,103 @@ export const uploadPhotoController = async (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      console.log("File upload failed authHeader", req.headers);
-      next(new NotAuthorizedError());
-      return;
-    }
-
-    const token = authHeader.split(" ")[1];
-    console.log("token", token);
-    let decodedToken;
     try {
-      decodedToken = jwt.verify(token, process.env.SECRET_KEY!) as {
-        id: string;
-        title: string;
-      };
-    } catch (err) {
-      console.log("File upload failed err");
-      next(new NotAuthorizedError());
-      return;
-    }
-    console.log("decodedToken", decodedToken);
-    if (!decodedToken?.id) {
-      console.log("File upload failed decodedToken?.id");
-      next(new NotAuthorizedError());
-      return;
-    }
+      const authHeader = req.headers.authorization;
+      if (!authHeader) return next(new NotAuthorizedError());
 
-    if (!req.file) {
-      console.log("File upload failed req.file");
-      res.status(400).json({ message: "File upload failed" });
-      return;
-    }
+      const token = authHeader.split(" ")[1];
+      let decodedToken;
+      try {
+        decodedToken = jwt.verify(token, process.env.SECRET_KEY!) as {
+          id: string;
+          title: string;
+        };
+      } catch {
+        next(new NotAuthorizedError());
+        return
+      }
 
-    const {
-      album,
-      description = "",
-      tags = [],
-      musicUrl = "",
-      title = "",
-      note = "",
-      location,
-      musicDetails,
-      photoDate = new Date(),
-      isPrivate = false,
-    } = req.body;
-    console.log("musicDetails", musicDetails);
-    const parsedTags = tags ? JSON.parse(tags) : [];
-    const parsedLocation = location ? JSON.parse(location) : null;
-    const parsedDate = location ? JSON.parse(photoDate) : new Date(Date.now());
-    const parsedIsPrivate = location ? JSON.parse(isPrivate) : false;
-    const parsedMusicDetails = musicDetails ? JSON.parse(musicDetails) : null;
-    console.log("parsedMusicDetails", parsedMusicDetails);
-    const newPhoto = new Photo({
-      user: decodedToken.id,
-      album,
-      url: (req.file as any).location,
-      moment: {
-        me: {
-          description,
+      if (!decodedToken?.id || !req.file) {
+        next(new BadRequestError("File upload failed"));
+        return;
+      }
+
+      const {
+        album,
+        description = "",
+        tags = [],
+        musicUrl = "",
+        title = "",
+        note = "",
+        location,
+        musicDetails,
+        photoDate = new Date(),
+        isPrivate = false,
+      } = req.body;
+
+      const parsedTags = tags ? JSON.parse(tags) : [];
+      const parsedLocation = location ? JSON.parse(location) : null;
+      const parsedDate = photoDate && !isNaN(new Date(photoDate).getTime()) 
+        ? new Date(photoDate) 
+        : new Date();
+      const parsedIsPrivate = typeof isPrivate === "string" ? JSON.parse(isPrivate) : isPrivate;
+      const parsedMusicDetails = musicDetails ? JSON.parse(musicDetails) : null;
+
+      const file = req.file;
+      console.log(photoDate, "photoDate");
+      // S3 için isim üret
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const thumbnailName = `thumb-${fileName}`;
+
+      // Orijinal ve Thumbnail oluştur
+      const [originalUrl, thumbnailUrl] = await Promise.all([
+        uploadToS3(file.buffer, fileName, file.mimetype),
+        sharp(file.buffer).resize({ width: 300 }).toBuffer().then((thumbBuffer: any) =>
+          uploadToS3(thumbBuffer, thumbnailName, file.mimetype)
+        ),
+      ]);
+      console.log(originalUrl, thumbnailUrl, "originalUrl, thumbnailUrl");
+      const newPhoto = new Photo({
+        user: decodedToken.id,
+        album,
+        url: originalUrl,
+        thumbnailUrl,
+        moment: {
+          me: {
+            description,
+          },
+          partner: {
+            description: "",
+          },
         },
-        partner: {
-          description: "",
-        },
-      },
-      photoDate: parsedDate,
-      tags: parsedTags,
-      musicUrl,
-      title,
-      note,
-      location: parsedLocation,
-      musicDetails: parsedMusicDetails,
-      isPrivate: parsedIsPrivate,
-    });
+        photoDate: parsedDate || new Date(),
+        tags: parsedTags,
+        musicUrl,
+        title,
+        note,
+        location: parsedLocation,
+        musicDetails: parsedMusicDetails,
+        isPrivate: parsedIsPrivate,
+      });
 
-    const test = await newPhoto.save();
+      const savedPhoto = await newPhoto.save();
 
-    res.status(201).json({
-      message: "Photo created successfully",
-      imageUrl: newPhoto.url,
-      newPhoto,
-      test,
-    });
+      res.status(201).json({
+        message: "Photo created successfully",
+        imageUrl: originalUrl,
+        thumbnailUrl,
+        photo: savedPhoto,
+      });
+    } catch (error) {
+      console.error("Error creating photo:", error);
+      next(new BadRequestError("Internal server error"));
+      return;
+    }
   } catch (error) {
     console.error("Error creating photo:", error);
     next(new BadRequestError("Internal server error"));
+    return;
+
   }
 };
-
 export default uploadPhotoController;

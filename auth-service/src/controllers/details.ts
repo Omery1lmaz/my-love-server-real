@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { User } from "../Models/user";
-import { BadRequestError } from "@heaven-nsoft/common";
 import mongoose from "mongoose";
 
 export const detailsController = async (req: Request, res: Response) => {
@@ -24,15 +23,21 @@ export const detailsController = async (req: Request, res: Response) => {
     };
     const user = await User.findById(
       new mongoose.Types.ObjectId(decodedToken.id)
-    );
+    ).populate("partnerId")
     if (!user) {
       res.status(404).json({ message: "Kullanıcı bulunamadı" });
       return;
     }
+    console.log("details controller", user)
     res.status(200).json({
       _id: user._id,
       email: user.email,
       name: user.name,
+      nickName: user.nickname || "",
+      partnerName: user.partnerName || "",
+      partnerNickname: user.partnerNickname,
+      profilePic: user.profilePhoto || "",
+      partnerProfilePic: user.partnerId ? (((user.partnerId) as any).profilePhoto) : ""
     });
   } catch (error) {
     res.status(400).json({ message: "Kimlik doğrulama başarısız" });

@@ -19,8 +19,6 @@ import { detailRouter } from "./routes/details";
 import { updateUserNameRouter } from "./routes/updateUserName";
 import { verifyRegisterPartnerCodeRouter } from "./routes/verifyRegisterPartnerCode";
 import { updateSpotifyTokensRouter } from "./routes/updateSpotifyTokens";
-import { favoritesRouter } from "./routes/favorites";
-import { interestsRouter } from "./routes/interests";
 import { moodRouter } from "./routes/mood";
 import { partnerRouter } from "./routes/partner";
 import { quizRouter } from "./routes/quiz";
@@ -55,6 +53,10 @@ import { deleteHobbyRouter } from "./routes/deleteHobby";
 import { createBookRouter } from "./routes/createBook";
 import { deleteBookRouter } from "./routes/deleteBook";
 import { getBooksRouter } from "./routes/getBooks";
+import { updateUserSharedMovieRouter } from "./routes/updateUserSharedMovie";
+import { getUserSharedMovieRouter } from "./routes/getUserSharedMovie";
+import { getUserSharedMovieDetailRouter } from "./routes/getUserSharedMovieDetail";
+import { deleteUserSharedMovieRouter } from "./routes/deleteUserSharedMovie";
 
 const app = express();
 app.set("trust proxy", true);
@@ -112,9 +114,6 @@ app.use(updateUserProfileDetailsRouter);
 app.use(partnerRouter);
 
 // User's favorites
-app.use(favoritesRouter);
-// User's Interests
-app.use(interestsRouter);
 // User's Questions
 app.use(updateUserQuestionsRouter);
 app.use(quizRouter);
@@ -134,6 +133,10 @@ app.use(updateUserFavoriteBookRouter);
 
 // User's Favorite Movies
 app.use(updateUserFavoriteMovieRouter);
+app.use(updateUserSharedMovieRouter);
+app.use(getUserSharedMovieRouter);
+app.use(getUserSharedMovieDetailRouter);
+app.use(deleteUserSharedMovieRouter);
 
 // User's Hobbies
 app.use(createHobbyRouter);
@@ -151,6 +154,9 @@ app.use(getUserRelationshipDateRouter);
 app.all("*", async (req, res, next) => {
   next(new NotFoundError());
 });
+
+
+// Page entegrated with api 
 
 app.use(
   (

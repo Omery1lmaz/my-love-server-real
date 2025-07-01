@@ -20,7 +20,9 @@ interface PhotoAttrs {
   album?: mongoose.Schema.Types.ObjectId | null;
   timeline?: mongoose.Schema.Types.ObjectId | null;
   event?: mongoose.Schema.Types.ObjectId | null;
+  dailyJournal?: mongoose.Schema.Types.ObjectId | null;
   url: string;
+  thumbnailUrl: string;
   description?: string;
   tags?: string[];
   isPrivate?: boolean;
@@ -53,6 +55,7 @@ interface PhotoDoc extends Document {
   user: mongoose.Schema.Types.ObjectId;
   album: mongoose.Schema.Types.ObjectId | null;
   timeline?: mongoose.Schema.Types.ObjectId | null;
+  dailyJournal?: mongoose.Schema.Types.ObjectId | null;
   url: string;
   moment: {
     me: MomentInfo;
@@ -73,6 +76,7 @@ interface PhotoDoc extends Document {
     spotifyUrl: string;
   };
   note: string;
+  thumbnailUrl: string;
   width?: number;
   height?: number;
   location?: Location;
@@ -119,9 +123,11 @@ const photoSchema = new Schema<PhotoDoc>(
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     album: { type: Schema.Types.ObjectId, ref: "Album", default: null },
     event: { type: Schema.Types.ObjectId, ref: "Event", default: null },
+    dailyJournal: { type: Schema.Types.ObjectId, ref: "DailyJournal", default: null },
     timeline: { type: Schema.Types.ObjectId, ref: "Timeline", default: null },
     photoDate: { type: Date, default: new Date(Date.now()) },
     url: { type: String, required: true },
+    thumbnailUrl: { type: String, required: true },
     description: { type: String, default: "" },
     tags: [{ type: String }],
     title: { type: String, default: "", required: false },

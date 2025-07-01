@@ -1,8 +1,8 @@
 import express from "express";
-import { deleteHobbyController } from "../controllers/deleteHobby";
+import { deleteBookController } from "../controllers/deleteBook";
 
 const router = express.Router();
 
-router.delete("/books/:id", deleteHobbyController);
+router.delete("/books/:id", deleteBookController);
 
 export { router as deleteBookRouter };

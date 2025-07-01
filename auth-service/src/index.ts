@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { natsWrapper } from "./nats-wrapper";
 import { app } from "./app";
+import { UserPhotoCreatedEvent } from "./events/listeners/user-photo-created-listener";
 const uri =
   "mongodb+srv://omery020040:4YHnA68V7SOwBAAm@cluster0.svjeglz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
@@ -57,6 +58,7 @@ const start = async () => {
     } catch (err) {
       console.error(err);
     }
+    new UserPhotoCreatedEvent(natsWrapper.client).listen();
 
     try {
       await mongoose.connect(uri, { timeoutMS: 10000 });

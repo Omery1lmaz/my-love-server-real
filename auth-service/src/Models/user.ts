@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 interface DailySong {
   id: string; // UUID for the song entry
   name: string;
+  partnerName?: string;
   images: [
     {
       url: string; // URL of the song image
@@ -80,6 +81,7 @@ interface Book {
 
 interface UserAttrs {
   name: string;
+  partnerName?: string;
   email: string;
   password: string;
   birthDate?: Date;
@@ -108,6 +110,7 @@ interface UserAttrs {
   relationshipGoals?: string[];
   isDeleted: boolean;
   partnerInvitationCode: number;
+  sharedMovies: [{ isShared: boolean, movie: Movie, note?: string, createdBy: "me" | "partner" }],
   spotifyAccessToken?: string;
   spotifyRefreshToken?: string;
   spotifyAccessTokenExpires?: Date;
@@ -116,8 +119,12 @@ interface UserAttrs {
   partnerSpotifyAccessTokenExpires?: Date;
   surname: string;
   gender: string;
-  profilePhoto?: string;
+  profilePhoto?: {
+    thumbnailUrl?: string;
+    url?: string;
+  };
   partnerNickname?: string;
+  nickname?: string;
   partnerNotes?: string;
   hobbies?: Hobby[];
   // This is a list of interests for the user
@@ -213,6 +220,7 @@ interface UserAttrs {
 interface UserDoc extends mongoose.Document {
   _id: mongoose.Schema.Types.ObjectId;
   name?: string;
+  partnerName?: string;
   email: string;
   password: string;
   birthDate?: Date;
@@ -220,6 +228,7 @@ interface UserDoc extends mongoose.Document {
   firstMeetingStory?: string;
   firstMeetingDate?: Date;
   hobbies?: Hobby[];
+  sharedMovies: [{ isShared: boolean, movie: Movie, note?: string, createdBy: "me" | "partner" }],
   relationshipGoals?: string[];
   provider: "email" | "google";
   googleId?: string;
@@ -252,8 +261,12 @@ interface UserDoc extends mongoose.Document {
   spotifyAccessTokenExpires?: Date;
   surname: string;
   gender: string;
-  profilePhoto?: string;
+  profilePhoto?: {
+    thumbnailUrl?: string;
+    url?: string;
+  };
   partnerNickname?: string;
+  nickname?: string;
   partnerNotes?: string;
   interests?: {
     music?: string[];
@@ -355,6 +368,7 @@ const userSchema = new mongoose.Schema<UserDoc>(
         albumId: { type: String, required: false },
         albumLink: { type: String, required: false },
         name: { type: String, required: false },
+        partnerName: { type: String, required: false },
         artists: [{ type: String, required: false }],
         images: [
           {
@@ -506,8 +520,12 @@ const userSchema = new mongoose.Schema<UserDoc>(
     partnerInvitationCode: { type: Number, required: true, unique: true },
     surname: { type: String, required: false },
     gender: { type: String, required: false },
-    profilePhoto: { type: String },
+    profilePhoto: {
+      thumbnailUrl: { type: String, required: false },
+      url: { type: String, required: false },
+    },
     partnerNickname: { type: String },
+    nickname: { type: String },
     partnerNotes: { type: String },
     interests: {
       music: [String],
@@ -563,6 +581,33 @@ const userSchema = new mongoose.Schema<UserDoc>(
         content: String,
         isPrivate: Boolean,
       },
+    ],
+    sharedMovies: [
+      {
+        createdBy: {
+          type: String,
+          enum: ["me", "partner"],
+          required: true,
+        },
+        isShared: Boolean,
+        note: String,
+        movie: {
+          adult: Boolean,
+          backdrop_path: String,
+          genre_ids: [Number],
+          id: Number,
+          original_language: String,
+          original_title: String,
+          overview: String,
+          popularity: Number,
+          poster_path: String,
+          release_date: String,
+          title: String,
+          video: Boolean,
+          vote_average: Number,
+          vote_count: Number,
+        },
+      }
     ],
     relationshipQuizzes: [
       {

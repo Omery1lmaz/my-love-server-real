@@ -30,7 +30,7 @@ const getEventsController = async (req: Request, res: Response) => {
     })
       .populate("photos")
       .populate("coverPhotoId");
-
+    console.log("events", events)
     if (!events) {
       console.log("events not found");
       res.status(400).json({ message: "Eventler bulunamadı" });

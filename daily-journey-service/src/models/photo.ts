@@ -1,4 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+interface MomentInfo {
+  description: string;
+}
 
 interface Location {
   address?: string;
@@ -15,7 +18,11 @@ interface Location {
 interface PhotoAttrs {
   user: mongoose.Schema.Types.ObjectId;
   album?: mongoose.Schema.Types.ObjectId | null;
+  timeline?: mongoose.Schema.Types.ObjectId | null;
+  event?: mongoose.Schema.Types.ObjectId | null;
+  dailyJournal?: mongoose.Schema.Types.ObjectId | null;
   url: string;
+  thumbnailUrl: string;
   description?: string;
   tags?: string[];
   isPrivate?: boolean;
@@ -38,17 +45,28 @@ interface PhotoAttrs {
   fileType?: string;
   photoDate: Date;
   isDeleted?: boolean;
+  moment: {
+    me: MomentInfo;
+    partner: MomentInfo;
+  };
 }
 
 interface PhotoDoc extends Document {
   user: mongoose.Schema.Types.ObjectId;
   album: mongoose.Schema.Types.ObjectId | null;
+  timeline?: mongoose.Schema.Types.ObjectId | null;
+  dailyJournal?: mongoose.Schema.Types.ObjectId | null;
   url: string;
+  moment: {
+    me: MomentInfo;
+    partner: MomentInfo;
+  };
   description: string;
   photoDate: Date;
   tags: string[];
   isPrivate: boolean;
-  title: string;
+  event?: mongoose.Schema.Types.ObjectId | null;
+  title?: string;
   musicUrl: string;
   musicDetails: {
     name: string;
@@ -58,6 +76,7 @@ interface PhotoDoc extends Document {
     spotifyUrl: string;
   };
   note: string;
+  thumbnailUrl: string;
   width?: number;
   height?: number;
   location?: Location;
@@ -91,17 +110,27 @@ const LocationSchema = new Schema<Location>(
   },
   { _id: false }
 );
+const momentSubSchema = new Schema(
+  {
+    description: { type: String, required: false },
+  },
+  { _id: false }
+);
 
 // ** Fotoğraf Şeması Tanımlama **
 const photoSchema = new Schema<PhotoDoc>(
   {
     user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     album: { type: Schema.Types.ObjectId, ref: "Album", default: null },
+    event: { type: Schema.Types.ObjectId, ref: "Event", default: null },
+    dailyJournal: { type: Schema.Types.ObjectId, ref: "Event", default: null },
+    timeline: { type: Schema.Types.ObjectId, ref: "Timeline", default: null },
     photoDate: { type: Date, default: new Date(Date.now()) },
     url: { type: String, required: true },
+    thumbnailUrl: { type: String, required: true },
     description: { type: String, default: "" },
     tags: [{ type: String }],
-    title: { type: String, default: "", required: true },
+    title: { type: String, default: "", required: false },
     isPrivate: { type: Boolean, default: false },
     musicUrl: { type: String, default: "" },
     musicDetails: {
@@ -120,6 +149,10 @@ const photoSchema = new Schema<PhotoDoc>(
     comments: { type: Number, default: 0 },
     fileType: { type: String, default: "image/jpeg" },
     isDeleted: { type: Boolean, default: false },
+    moment: {
+      me: { type: momentSubSchema, required: false },
+      partner: { type: momentSubSchema, required: false },
+    },
   },
   { timestamps: true }
 );

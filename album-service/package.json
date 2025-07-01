@@ -15,7 +15,7 @@
   "dependencies": {
     "@google-cloud/storage": "^7.15.2",
     "@heaven-nsoft/common": "^1.2.8",
-    "@heaven-nsoft/my-love-common": "^1.2.29",
+    "@heaven-nsoft/my-love-common": "^1.2.50",
     "aws-sdk": "^2.1692.0",
     "bcrypt": "^5.1.1",
     "express": "^4.21.2",

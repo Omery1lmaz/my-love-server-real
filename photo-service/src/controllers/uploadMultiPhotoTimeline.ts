@@ -5,21 +5,21 @@ import mongoose from "mongoose";
 import { Photo } from "../models/photo";
 import { TimelinePhotoCreatedPublisher } from "../events/publishers/timeline-photo-created-publisher";
 import { natsWrapper } from "../nats-wrapper";
+import sharp from "sharp";
+import { uploadToS3 } from "../utils/multer-s3/upload";
 
 const uploadMultiPhotoTimelineController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // Return type is Promise<void>
   try {
-    console.log("uploadMultiPhotoEventController");
+    console.log("uploadMultiPhotoTimelineController");
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       next(new NotAuthorizedError());
       return;
     }
-
     const token = authHeader.split(" ")[1];
     let decodedToken;
     try {
@@ -48,13 +48,25 @@ const uploadMultiPhotoTimelineController = async (
       note = "",
       location,
       coverPhotoFileName,
-      eventId,
+      timelineId,
     } = req.body;
-    console.log("coverPhotoFileName", coverPhotoFileName);
+
     const uploadedPhotos = [];
     let coverPhotoId = null;
     for (const file of req.files) {
       console.log("file", file);
+
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const thumbnailName = `thumb-${fileName}`;
+
+      // Upload original and thumbnail to S3
+      const [originalUrl, thumbnailUrl] = await Promise.all([
+        uploadToS3(file.buffer, fileName, file.mimetype),
+        sharp(file.buffer).resize({ width: 300 }).toBuffer().then((thumbBuffer: any) =>
+          uploadToS3(thumbBuffer, thumbnailName, file.mimetype)
+        ),
+      ]);
+
       let locationData = null;
       if (location) {
         locationData = JSON.parse(location);
@@ -62,8 +74,9 @@ const uploadMultiPhotoTimelineController = async (
 
       const newPhoto = new Photo({
         user: new mongoose.Types.ObjectId(),
-        event: eventId,
-        url: (file as any).location,
+        timeline: timelineId,
+        url: originalUrl,
+        thumbnailUrl,
         tags,
         musicUrl,
         note,
@@ -88,6 +101,7 @@ const uploadMultiPhotoTimelineController = async (
         user: photo.user,
         timeline: photo.timeline || null,
         url: photo.url,
+        thumbnailUrl: photo.thumbnailUrl,
         description: photo.description,
         photoDate: new Date(),
         tags: photo.tags || [],

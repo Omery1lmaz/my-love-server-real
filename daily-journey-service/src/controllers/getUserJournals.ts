@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 const getUserJournalsController = async (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
-
+  console.log("get user journals")
   if (!authHeader) {
     console.log("authHeader not found");
     res.status(401).json({ message: "Lütfen giriş yapın" });
@@ -24,16 +24,17 @@ const getUserJournalsController = async (req: Request, res: Response) => {
       id: string;
     };
 
+
     const { page = 1, limit = 10, sort = "desc" } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
-
+    console.log(decodedToken.id, "decoded token id")
     const journals = await DailyJournal.find({ user: decodedToken.id })
       .sort({ date: sort === "desc" ? -1 : 1 })
       .skip(skip)
       .limit(Number(limit))
       .populate("photos", "url")
       .exec();
-
+    console.log("journals test", journals)
     const total = await DailyJournal.countDocuments({ user: decodedToken.id });
 
     res.status(200).json({

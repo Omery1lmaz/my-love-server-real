@@ -27,10 +27,10 @@ const createJournalController = async (req: Request, res: Response) => {
       id: string;
     };
 
-    const { title, content, mood, isPrivate } = req.body;
+    const { title, content, mood, isPrivate, tags, weather } = req.body;
     const user = await User.findById(decodedToken.id);
     if (!user) {
-      console.log("user not found");
+      console.log("user not found create journal");
       res.status(400).json({ message: "Kullanıcı bulunamadı" });
       return;
     }
@@ -43,6 +43,8 @@ const createJournalController = async (req: Request, res: Response) => {
       mood,
       partner: user.partnerId,
       isPrivate,
+      tags,
+      weather,
     });
 
     await journal.save();

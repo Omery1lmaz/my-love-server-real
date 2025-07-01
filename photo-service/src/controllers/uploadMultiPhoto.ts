@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import { Photo } from "../models/photo";
 import { AlbumPhotoCreatedPublisher } from "../events/publishers/album-photo-created-publisher";
 import { natsWrapper } from "../nats-wrapper";
+import sharp from "sharp";
+import { uploadToS3 } from "../utils/multer-s3/upload";
 
 export const uploadMultiPhotoController = async (
   req: Request,
@@ -47,47 +49,84 @@ export const uploadMultiPhotoController = async (
       location,
       coverPhotoFileName,
       albumId,
+      title = "",
+      musicDetails,
+      photoDate = new Date(),
+      isPrivate = false,
     } = req.body;
-    console.log("coverPhotoFileName", coverPhotoFileName);
+
     const uploadedPhotos = [];
     let coverPhotoId = null;
+
     for (const file of req.files) {
-      console.log("file", file);
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const thumbnailName = `thumb-${fileName}`;
+
+      // Upload original and thumbnail to S3
+      const [originalUrl, thumbnailUrl] = await Promise.all([
+        uploadToS3(file.buffer, fileName, file.mimetype),
+        sharp(file.buffer).resize({ width: 300 }).toBuffer().then((thumbBuffer: any) =>
+          uploadToS3(thumbBuffer, thumbnailName, file.mimetype)
+        ),
+      ]);
+
       let locationData = null;
       if (location) {
         locationData = JSON.parse(location);
       }
+      console.log("tags", tags);
+      let parsedTags = [];
+      try {
+        parsedTags = tags && typeof tags === "string" ? JSON.parse(tags) : [];
+      } catch (error) {
+        console.log("error", error);
+      }
+      const parsedDate = photoDate && !isNaN(new Date(photoDate).getTime())
+        ? new Date(photoDate)
+        : new Date();
+      const parsedIsPrivate = typeof isPrivate === "string" ? JSON.parse(isPrivate) : isPrivate;
+      const parsedMusicDetails = musicDetails ? JSON.parse(musicDetails) : null;
 
       const newPhoto = new Photo({
-        user: new mongoose.Types.ObjectId(),
+        user: decodedToken.id,
         album: albumId,
-        url: (file as any).location,
-        tags,
+        url: originalUrl,
+        thumbnailUrl,
+        moment: {
+          me: {
+            description,
+          },
+          partner: {
+            description: "",
+          },
+        },
+        photoDate: parsedDate,
+        tags: parsedTags,
         musicUrl,
+        title,
         note,
         location: locationData,
-        isPrivate: false,
+        musicDetails: parsedMusicDetails,
+        isPrivate: parsedIsPrivate,
       });
 
       const savedPhoto = await newPhoto.save();
       uploadedPhotos.push(savedPhoto);
+
       if (coverPhotoFileName === file.originalname) {
-        console.log(
-          "coverPhotoFileName",
-          coverPhotoFileName,
-          file.originalname
-        );
         coverPhotoId = savedPhoto._id;
       }
     }
+
     await new AlbumPhotoCreatedPublisher(natsWrapper.client).publish({
       photos: uploadedPhotos.map((photo) => ({
         id: (photo._id as any).toString(),
         user: photo.user,
         album: photo.album,
         url: photo.url,
+        thumbnailUrl: photo.thumbnailUrl,
         description: photo.description,
-        photoDate: new Date(),
+        photoDate: photo.photoDate,
         tags: photo.tags || [],
         title: photo.title || "",
         isPrivate: photo.isPrivate,
@@ -114,7 +153,7 @@ export const uploadMultiPhotoController = async (
         ? (coverPhotoId as any).toString()
         : (uploadedPhotos[0]._id as any).toString(),
     });
-    console.log("cover photo id", coverPhotoId);
+
     res.status(201).json({
       message: "Photos uploaded successfully",
       uploadedPhotos: uploadedPhotos || [],

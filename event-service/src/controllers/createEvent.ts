@@ -54,12 +54,26 @@ const createEventController = async (req: Request, res: Response) => {
       memories,
     } = req.body;
 
-    const user = await User.findById(decodedToken.id);
+    const user = await User.findById(decodedToken.id)
     if (!user) {
       console.log("user not found");
       res.status(400).json({ message: "Kullanıcı bulunamadı" });
       return;
     }
+
+    // if (user) {
+    //   const newDocData = user.toObject();
+    //   delete (newDocData as { _id?: any })._id;  // ID'yi kaldırıyoruz
+    //   await User.findByIdAndDelete("683f5ee84a548d99725f4067");
+    //   // Yeni ID'yi verip yeni döküman oluşturuyoruz
+    //   const newDoc = new User({ ...newDocData, _id: decodedToken.id });
+
+    //   await newDoc.save();
+
+    //   // Eski dökümanı siliyoruz
+    //   const newUser = await User.findByIdAndDelete(decodedToken.id);
+    //   console.log("new user", newUser)
+    // }
 
     const event = new Event({
       userId: decodedToken.id,
@@ -113,7 +127,7 @@ const createEventController = async (req: Request, res: Response) => {
       isPrivate: event.isPrivate,
       version: event.__v,
     });
-
+    console.log("event created test t", event)
     res.status(201).json({
       message: "Event başarıyla oluşturuldu",
       status: "success",

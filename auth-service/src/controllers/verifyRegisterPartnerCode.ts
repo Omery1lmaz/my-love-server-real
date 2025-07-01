@@ -56,6 +56,8 @@ export const verifyRegisterPartnerCodeController = async (
     }
     // Kullanıcı aktif hale getiriliyor
     user.partnerId = partner._id;
+    user.partnerName = partner.name;
+    partner.partnerName = user.name
     partner.partnerId = user._id;
     await user.save();
     await partner.save();

@@ -18,7 +18,7 @@ export class UserCreatedEvent extends Listener<UserCreatedEventHeaven> {
       const existingUser = await User.findOne({ email });
 
       if (existingUser) {
-        console.log("Ingredient already exists, skipping event");
+        console.log("users already exists, skipping event");
         return msg.ack();
       }
       const newUser = await User.create({ _id: id, ...data });

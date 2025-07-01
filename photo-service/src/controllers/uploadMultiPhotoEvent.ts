@@ -6,6 +6,8 @@ import { Photo } from "../models/photo";
 import { AlbumPhotoCreatedPublisher } from "../events/publishers/album-photo-created-publisher";
 import { natsWrapper } from "../nats-wrapper";
 import { EventPhotoCreatedPublisher } from "../events/publishers/album-photo-created-publisher copy";
+import sharp from "sharp";
+import { uploadToS3 } from "../utils/multer-s3/upload";
 
 const uploadMultiPhotoEventController = async (
   req: Request,
@@ -56,6 +58,18 @@ const uploadMultiPhotoEventController = async (
     let coverPhotoId = null;
     for (const file of req.files) {
       console.log("file", file);
+
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const thumbnailName = `thumb-${fileName}`;
+
+      // Upload original and thumbnail to S3
+      const [originalUrl, thumbnailUrl] = await Promise.all([
+        uploadToS3(file.buffer, fileName, file.mimetype),
+        sharp(file.buffer).resize({ width: 300 }).toBuffer().then((thumbBuffer: any) =>
+          uploadToS3(thumbBuffer, thumbnailName, file.mimetype)
+        ),
+      ]);
+
       let locationData = null;
       if (location) {
         locationData = JSON.parse(location);
@@ -64,7 +78,8 @@ const uploadMultiPhotoEventController = async (
       const newPhoto = new Photo({
         user: new mongoose.Types.ObjectId(),
         event: eventId,
-        url: (file as any).location,
+        url: originalUrl,
+        thumbnailUrl,
         tags,
         musicUrl,
         note,
@@ -90,6 +105,7 @@ const uploadMultiPhotoEventController = async (
         album: photo.album || null,
         event: photo.event || null,
         url: photo.url,
+        thumbnailUrl: photo.thumbnailUrl,
         description: photo.description,
         photoDate: new Date(),
         tags: photo.tags || [],

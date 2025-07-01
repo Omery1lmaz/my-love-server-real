@@ -9,6 +9,7 @@ interface DailyJournalAttrs {
   mood?: string;
   photos?: mongoose.Schema.Types.ObjectId[];
   partner?: mongoose.Schema.Types.ObjectId;
+  coverPhoto?: mongoose.Schema.Types.ObjectId;
   isPrivate?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -22,6 +23,7 @@ interface DailyJournalDoc extends mongoose.Document {
   content: string;
   mood: string;
   tags: string[];
+  coverPhoto?: mongoose.Schema.Types.ObjectId;
   photos: mongoose.Schema.Types.ObjectId[];
   partner: mongoose.Schema.Types.ObjectId;
   weather: {
@@ -92,6 +94,10 @@ const dailyJournalSchema = new mongoose.Schema<DailyJournalDoc>(
     partner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+    },
+    coverPhoto: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Photo",
     },
     weather: {
       condition: {

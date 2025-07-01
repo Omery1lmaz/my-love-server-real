@@ -13,7 +13,6 @@ export class UserPartnerUpdatedEvent extends Listener<UserPartnerUpdatedEventHea
 
   async onMessage(data: UserPartnerUpdatedEventHeaven["data"], msg: Message) {
     const { userId, partnerId } = data;
-    console.log(userId, partnerId, "id");
     try {
       const existingUser = await User.findByIdAndUpdate(userId, {
         partnerId,

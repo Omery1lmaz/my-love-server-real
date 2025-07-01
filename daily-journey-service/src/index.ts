@@ -11,6 +11,7 @@ import { UserAccountDeletedEvent } from "./events/listeners/user-account-deleted
 import { UserActivatedEvent } from "./events/listeners/user-activated-event";
 import { UserCreatedEvent } from "./events/listeners/user-created-listener";
 import { UserPartnerUpdatedEvent } from "./events/listeners/user-partner-updated-listener";
+import { DailyJournalPhotoCreatedEvent } from "./events/listeners/daily-journal-photo-created-listener";
 const uri =
   "mongodb+srv://omery020040:7h0gjfvnmgWEmTiu@cluster0.1xu8cuq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const start = async () => {
@@ -48,6 +49,7 @@ const start = async () => {
       new UserAccountDeletedEvent(natsWrapper.client).listen();
       new UserCreatedEvent(natsWrapper.client).listen();
       new UserPartnerUpdatedEvent(natsWrapper.client).listen();
+      new DailyJournalPhotoCreatedEvent(natsWrapper.client).listen();
       process.on("SIGINT", () => natsWrapper.client.close());
       process.on("SIGTERM", () => natsWrapper.client.close());
     } catch (err) {
